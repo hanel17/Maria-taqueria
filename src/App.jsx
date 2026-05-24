@@ -423,10 +423,6 @@ export default function App() {
       <div style={{ background: primary, padding: "16px 20px 18px", color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {identity.logo
-              ? <div style={{ width: 42, height: 42, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(255,255,255,.3)" }}><img src={identity.logo} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
-              : <span style={{ fontSize: 30 }}>🌮</span>
-            }
             <div>
               <div style={{ fontWeight: 900, fontSize: 18 }}>{identity.name || "Maria Taquería"}</div>
               <div style={{ fontSize: 11, opacity: 0.8 }}>{identity.welcome || "Sabor mexicano en República Dominicana"}</div>
