@@ -432,8 +432,21 @@ export default function App() {
               <div style={{ fontSize: 11, opacity: 0.8 }}>{identity.welcome || "Sabor mexicano en República Dominicana"}</div>
             </div>
           </div>
-          <button onClick={() => setShowPin(true)} style={{ background: "rgba(255,255,255,.18)", border: "none", color: "#fff", borderRadius: 10, padding: "6px 14px", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>Admin</button>
-        </div>
+<div onClick={() => {
+  const now = Date.now();
+  if (!window._tapTimes) window._tapTimes = [];
+  window._tapTimes = window._tapTimes.filter(t => now - t < 2000);
+  window._tapTimes.push(now);
+  if (window._tapTimes.length >= 5) {
+    window._tapTimes = [];
+    setShowPin(true);
+  }
+}} style={{ cursor: "pointer", userSelect: "none" }}>
+  {identity.logo
+    ? <div style={{ width: 42, height: 42, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(255,255,255,.3)" }}><img src={identity.logo} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
+    : <span style={{ fontSize: 30 }}>🌮</span>
+  }
+</div>        </div>
       </div>
       <div style={{ overflowX: "auto", display: "flex", gap: 8, padding: "14px 16px 4px", scrollbarWidth: "none" }}>
         {CATEGORIES.map(cat => (
