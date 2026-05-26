@@ -420,13 +420,14 @@ export default function App() {
   };
 
   const handleSaveIdentity = async (data) => {
-    if (data.id) {
-      await supabase.from("identity").update(data).eq("id", data.id);
+    const { id, updated_at, ...rest } = data;
+    if (id) {
+      await supabase.from("identity").update(rest).eq("id", id);
+      setIdentity(data);
     } else {
-      const { data: newId } = await supabase.from("identity").insert([data]).select();
+      const { data: newId } = await supabase.from("identity").insert([rest]).select();
       if (newId) setIdentity(newId[0]);
     }
-    setIdentity(data);
   };
 
   const addToCart = (item) => setCart(p => { const ex = p.find(i => i.id === item.id); return ex ? p.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i) : [...p, { ...item, qty: 1 }]; });
