@@ -211,7 +211,7 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
           <div style={{ fontSize: 11, color: "#aaa", letterSpacing: 2 }}>PANEL ADMIN</div>
           <div style={{ fontWeight: 800, fontSize: 18, color: palette.accent }}>Maria Taqueria</div>
         </div>
-        <button onClick={onClose} style={{ background: palette.primary, border: "none", color: "#fff", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>Ver menu →</button>
+        <div style={{display:"flex",gap:8}}><button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ background: "#333", border: "none", color: "#aaa", borderRadius: 10, padding: "8px 12px", cursor: "pointer", fontWeight: 700, fontSize: 12 }}>🗑 Cache</button><button onClick={onClose} style={{ background: palette.primary, border: "none", color: "#fff", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>Ver menu →</button></div>
       </div>
       <div style={{ display: "flex", borderBottom: "1px solid #333", background: "#111", padding: "0 16px" }}>
         {tabs.map(t => (
