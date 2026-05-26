@@ -451,6 +451,14 @@ export default function App() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  useEffect(() => {
+    const channel = supabase.channel('identity-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'identity' }, () => { loadData(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => { loadData(); })
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [loadData]);
+
   const handleSaveItem = async (editingId, data) => {
     if (editingId === "new") { const { data: n } = await supabase.from("items").insert([data]).select(); if (n) setItems(p => [...p, n[0]]); }
     else { await supabase.from("items").update(data).eq("id", editingId); setItems(p => p.map(i => i.id === editingId ? { ...i, ...data } : i)); }
