@@ -93,7 +93,7 @@ function Spinner({ primary }) {
 
 function ItemCard({ item, onAdd, palette }) {
   return (
-    <div style={{ background: palette.bg === "#1a0a2e" ? "#2a1040" : "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,.3)", display: "flex", opacity: item.available ? 1 : 0.4, border: "1px solid " + palette.primary + "44" }}>
+    <div style={{ background: palette.bg === "#1a0a2e" ? "#2a1040" : palette.bg === "#03045E" ? "#023E8A" : palette.bg === "#1a0a0a" ? "#2a1010" : palette.bg === "#1C1C1C" ? "#2a2a2a" : "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,.3)", display: "flex", opacity: item.available ? 1 : 0.4, border: "1px solid " + palette.primary + "44" }}>
       <div style={{ width: 110, height: 110, flexShrink: 0, background: "#1a0a2e", overflow: "hidden", position: "relative" }}>
         <img src={item.image || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
