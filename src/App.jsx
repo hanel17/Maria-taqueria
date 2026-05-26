@@ -460,8 +460,16 @@ export default function App() {
   }, [loadData]);
 
   const handleSaveItem = async (editingId, data) => {
-    if (editingId === "new") { const { data: n } = await supabase.from("items").insert([data]).select(); if (n) setItems(p => [...p, n[0]]); }
-    else { await supabase.from("items").update(data).eq("id", editingId); setItems(p => p.map(i => i.id === editingId ? { ...i, ...data } : i)); }
+    const { id, created_at, ...rest } = data;
+    if (editingId === "new") {
+      const { data: n, error } = await supabase.from("items").insert([rest]).select();
+      if (error) { alert("Error: " + error.message); return; }
+      if (n) setItems(p => [...p, n[0]]);
+    } else {
+      const { error } = await supabase.from("items").update(rest).eq("id", editingId);
+      if (error) { alert("Error: " + error.message); return; }
+      setItems(p => p.map(i => i.id === editingId ? { ...i, ...rest } : i));
+    }
   };
 
   const handleDeleteItem = async (id) => { await supabase.from("items").delete().eq("id", id); setItems(p => p.filter(i => i.id !== id)); };
