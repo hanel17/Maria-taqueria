@@ -30,14 +30,15 @@ const INITIAL_ITEMS = [
 
 const CATEGORIES = ["Todos", "Bebidas", "Entradas", "Tacos", "México", "Especialidades", "Postres"];
 
-function readFileAsDataURL(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'maria_taqueria');
+  const res = await fetch('https://api.cloudinary.com/v1_1/dn8exsusx/image/upload', { method: 'POST', body: formData });
+  const data = await res.json();
+  return data.secure_url;
 }
+function readFileAsDataURL(file) { return uploadToCloudinary(file); }
 
 function fmtDate(ts) {
   return new Date(ts).toLocaleString("es-DO", { dateStyle: "short", timeStyle: "short" });
