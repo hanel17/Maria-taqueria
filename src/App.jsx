@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import * as XLSX from "xlsx";
 import { createClient } from "@supabase/supabase-js";
 
@@ -10,6 +10,15 @@ const CLOUDINARY_CLOUD = "dn8exsusx";
 const CLOUDINARY_PRESET = "maria_taqueria";
 
 const ADMIN_PIN = "1234";
+
+const GLOBAL_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; font-family: 'DM Sans', sans-serif; }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+`;
 
 const COLOR_PALETTES = [
   { name: "Dia de Muertos", primary: "#7B2D8B", bg: "#1a0a2e", accent: "#FF6B35", text: "#FFD700" },
@@ -92,49 +101,50 @@ function Spinner({ primary }) {
 }
 
 function ItemCard({ item, onAdd, palette }) {
+  const [hov, setHov] = React.useState(false);
+  const isDark = ["#1a0a2e","#03045E","#1a0a0a","#1C1C1C"].includes(palette.bg);
+  const cardBg = isDark ? (palette.bg === "#1a0a2e" ? "#2a1040" : palette.bg === "#03045E" ? "#023E8A" : palette.bg === "#1a0a0a" ? "#2a1010" : "#2a2a2a") : "#fff";
   return (
-    <div style={{ background: palette.bg === "#1a0a2e" ? "#2a1040" : palette.bg === "#03045E" ? "#023E8A" : palette.bg === "#1a0a0a" ? "#2a1010" : palette.bg === "#1C1C1C" ? "#2a2a2a" : "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,.3)", display: "flex", opacity: item.available ? 1 : 0.4, border: "1px solid " + palette.primary + "44" }}>
-      <div style={{ width: 110, height: 110, flexShrink: 0, background: "#1a0a2e", overflow: "hidden", position: "relative" }}>
-        <img src={item.image || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{ background: cardBg, borderRadius: 22, overflow: "hidden", display: "flex",
+        opacity: item.available ? 1 : 0.45,
+        border: "1.5px solid " + (hov ? palette.primary : palette.primary + "25"),
+        boxShadow: hov ? "0 16px 48px " + palette.primary + "30" : "0 2px 12px rgba(0,0,0,.09)",
+        transform: hov ? "translateY(-3px)" : "translateY(0)",
+        transition: "all 0.28s cubic-bezier(.4,0,.2,1)" }}>
+      <div style={{ width: 118, height: 118, flexShrink: 0, overflow: "hidden", position: "relative" }}>
+        <img src={item.image || PLACEHOLDER} alt={item.name}
+          style={{ width: "100%", height: "100%", objectFit: "cover",
+            transform: hov ? "scale(1.1)" : "scale(1)", transition: "transform 0.45s ease" }} />
+        {item.spicy && (
+          <div style={{ position: "absolute", top: 7, left: 7,
+            background: "linear-gradient(135deg,#ff4500,#ff8c00)", borderRadius: 20,
+            padding: "3px 8px", fontSize: 9, fontWeight: 900, color: "#fff", letterSpacing: 0.8,
+            boxShadow: "0 2px 8px rgba(255,69,0,.5)" }}>🔥 PICANTE</div>
+        )}
       </div>
-      <div style={{ flex: 1, padding: "12px 14px 12px 12px", display: "flex", flexDirection: "column", justifyContent: "space-between", minWidth: 0 }}>
+      <div style={{ flex: 1, padding: "14px 14px 12px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between", minWidth: 0 }}>
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6, marginBottom: 4 }}>
-            <span style={{ fontWeight: 800, fontSize: 14, color: palette.text, lineHeight: 1.3 }}>{item.name}</span>
-            {item.spicy && <SpicyBadge />}
-          </div>
-          <p style={{ fontSize: 11, color: palette.text + "99", margin: 0, lineHeight: 1.5, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.description}</p>
+          <div style={{ fontWeight: 800, fontSize: 14.5, color: palette.text, lineHeight: 1.3, marginBottom: 6, letterSpacing: "-0.3px" }}>{item.name}</div>
+          <p style={{ fontSize: 11.5, color: palette.text + "77", margin: 0, lineHeight: 1.6, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.description}</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-          <span style={{ color: palette.accent, fontWeight: 900, fontSize: 17 }}>RD${item.price}</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+          <span style={{ color: palette.accent, fontWeight: 900, fontSize: 19, letterSpacing: "-0.8px" }}>RD${item.price}</span>
           {item.available && (
-            <button onClick={() => onAdd(item)} style={{ width: 34, height: 34, borderRadius: "50%", background: palette.primary, border: "none", color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 300, boxShadow: "0 4px 12px " + palette.primary + "66" }}>+</button>
+            <button onClick={(e) => { e.stopPropagation(); onAdd(item); }}
+              style={{ width: 38, height: 38, borderRadius: "50%",
+                background: "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)",
+                border: "none", color: "#fff", fontSize: 22, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 6px 20px " + palette.primary + "50",
+                transform: hov ? "scale(1.12) rotate(90deg)" : "scale(1) rotate(0deg)",
+                transition: "transform 0.3s ease" }}>+</button>
           )}
         </div>
       </div>
     </div>
   );
 }
-
-function CategorySection({ category, items, onAdd, palette }) {
-  const [open, setOpen] = useState(true);
-  const catItems = items.filter(i => i.category === category && i.available);
-  if (catItems.length === 0) return null;
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <div onClick={() => setOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: palette.primary + "22", cursor: "pointer", borderLeft: "4px solid " + palette.primary }}>
-        <span style={{ fontWeight: 900, fontSize: 16, color: palette.text, letterSpacing: 1, textTransform: "uppercase" }}>{category}</span>
-        <span style={{ color: palette.primary, fontSize: 20, fontWeight: 900 }}>{open ? "−" : "+"}</span>
-      </div>
-      {open && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "12px 16px" }}>
-          {catItems.map(item => <ItemCard key={item.id} item={item} onAdd={onAdd} palette={palette} />)}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette }) {
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   return (
@@ -507,52 +517,102 @@ export default function App() {
   if (showAdmin) return <AdminPanel items={items} setItems={setItems} orders={orders} identity={identity} setIdentity={setIdentity} onClose={() => setShowAdmin(false)} onSaveItem={handleSaveItem} onDeleteItem={handleDeleteItem} onSaveIdentity={handleSaveIdentity} palette={palette} />;
 
   return (
-    <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "Georgia, serif", maxWidth: 480, margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ background: palette.primary, padding: "14px 16px", color: "#fff", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 4px 20px " + palette.primary + "66" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }} onClick={() => { const now = Date.now(); if (!window._t) window._t = []; window._t = window._t.filter(t => now - t < 2000); window._t.push(now); if (window._t.length >= 5) { window._t = []; setShowPin(true); } }}>
-            {identity.logo ? <div style={{ width: 44, height: 44, borderRadius: 10, overflow: "hidden", border: "2px solid rgba(255,255,255,.4)" }}><img src={identity.logo} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div> : <span style={{ fontSize: 32 }}>🌮</span>}
+    <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "'DM Sans', sans-serif", maxWidth: 480, margin: "0 auto" }}>
+      <style>{GLOBAL_STYLES}</style>
+
+      {/* HEADER */}
+      <div style={{ background: "linear-gradient(135deg," + palette.primary + " 0%," + palette.accent + "dd 100%)", padding: "0 16px", color: "#fff", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 8px 32px " + palette.primary + "55" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: 66 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}
+            onClick={() => { const now = Date.now(); if (!window._t) window._t = []; window._t = window._t.filter(t => now - t < 2000); window._t.push(now); if (window._t.length >= 5) { window._t = []; setShowPin(true); } }}>
+            {identity.logo
+              ? <div style={{ width: 46, height: 46, borderRadius: 13, overflow: "hidden", border: "2px solid rgba(255,255,255,.5)", boxShadow: "0 4px 16px rgba(0,0,0,.3)" }}><img src={identity.logo} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
+              : <div style={{ width: 46, height: 46, borderRadius: 13, background: "rgba(255,255,255,.18)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, backdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,.35)" }}>🌮</div>
+            }
             <div>
-              <div style={{ fontWeight: 900, fontSize: 18, letterSpacing: "-0.3px" }}>{identity.name || "Maria Taqueria"}</div>
-              <div style={{ fontSize: 11, opacity: 0.85 }}>{identity.welcome || "Sabor mexicano en Republica Dominicana"}</div>
+              <div style={{ fontWeight: 900, fontSize: 17, letterSpacing: "-0.5px", textShadow: "0 2px 8px rgba(0,0,0,.2)" }}>{identity.name || "Maria Taqueria"}</div>
+              <div style={{ fontSize: 10.5, opacity: 0.88, letterSpacing: 0.3, fontWeight: 500 }}>{identity.welcome || "Sabor mexicano autentico"}</div>
             </div>
           </div>
-          <button onClick={() => setShowCart(true)} style={{ background: cartCount > 0 ? palette.accent : "rgba(255,255,255,.2)", border: "none", color: "#fff", borderRadius: 12, padding: "8px 14px", cursor: "pointer", fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 6, transition: "background .2s" }}>
-            🛒 {cartCount > 0 && <span style={{ background: "#fff", color: palette.primary, borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900 }}>{cartCount}</span>}
+          <button onClick={() => setShowCart(true)} style={{ background: cartCount > 0 ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.13)", border: "1.5px solid rgba(255,255,255,.4)", color: "#fff", borderRadius: 16, padding: "9px 16px", cursor: "pointer", fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 8, backdropFilter: "blur(10px)", transition: "all .2s", boxShadow: cartCount > 0 ? "0 4px 20px rgba(0,0,0,.25)" : "none" }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            {cartCount > 0
+              ? <span style={{ background: "#fff", color: palette.primary, borderRadius: 20, padding: "2px 9px", fontSize: 12, fontWeight: 900 }}>{cartCount}</span>
+              : <span style={{ fontSize: 12, fontWeight: 600 }}>Carrito</span>}
           </button>
         </div>
       </div>
 
-      {/* Banner */}
+      {/* BANNER */}
       {identity.banner && (
-        <div style={{ width: "100%", height: 180, overflow: "hidden" }}>
+        <div style={{ width: "100%", height: 190, overflow: "hidden", position: "relative" }}>
           <img src={identity.banner} alt="banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top," + palette.bg + "cc 0%,transparent 55%)" }} />
         </div>
       )}
 
-      {/* Spice filter */}
-      <div style={{ display: "flex", gap: 8, padding: "12px 16px 8px", overflowX: "auto", scrollbarWidth: "none" }}>
-        {[["todos", "🍽 Todos"], ["picantes", "🔥 Picantes"], ["no-picantes", "🌿 No picantes"]].map(([val, label]) => (
-          <button key={val} onClick={() => setSpiceFilter(val)} style={{ padding: "7px 16px", borderRadius: 20, border: "2px solid " + (spiceFilter === val ? palette.primary : palette.primary + "44"), background: spiceFilter === val ? palette.primary : "transparent", color: spiceFilter === val ? "#fff" : palette.text, fontWeight: 700, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
-            {label}
-          </button>
+      {/* CATEGORY TABS */}
+      <div style={{ padding: "14px 16px 6px", background: palette.bg }}>
+        <div style={{ overflowX: "auto", display: "flex", gap: 8, scrollbarWidth: "none", paddingBottom: 2 }}>
+          {["Todos", ...CATEGORIES].map((cat) => {
+            const icons = {"Todos":"🍽","Bebidas":"🥤","Entradas":"🥗","Tacos":"🌮","Mexico":"🇲🇽","Especialidades":"⭐","Postres":"🍮"};
+            const isActive = activeCategory === cat;
+            return (
+              <button key={cat} onClick={() => setActiveCategory(cat)} style={{
+                padding: "9px 18px", borderRadius: 24,
+                background: isActive ? "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)" : palette.primary + "14",
+                border: isActive ? "none" : "1.5px solid " + palette.primary + "28",
+                color: isActive ? "#fff" : palette.text,
+                fontWeight: isActive ? 800 : 600, fontSize: 12.5,
+                cursor: "pointer", whiteSpace: "nowrap",
+                boxShadow: isActive ? "0 6px 22px " + palette.primary + "44" : "none",
+                transform: isActive ? "translateY(-1px)" : "translateY(0)",
+                transition: "all 0.22s cubic-bezier(.4,0,.2,1)",
+                display: "flex", alignItems: "center", gap: 5,
+              }}>
+                <span style={{ fontSize: 14 }}>{icons[cat] || "🍴"}</span>
+                <span>{cat}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SPICE FILTER */}
+      <div style={{ display: "flex", gap: 6, padding: "6px 16px 12px", overflowX: "auto", scrollbarWidth: "none" }}>
+        {[["todos","✨ Todos"],["picantes","🔥 Picantes"],["no-picantes","🌿 Suaves"]].map(([val, label]) => (
+          <button key={val} onClick={() => setSpiceFilter(val)} style={{
+            padding: "5px 14px", borderRadius: 20,
+            background: spiceFilter === val ? palette.accent + "20" : "transparent",
+            border: "1px solid " + (spiceFilter === val ? palette.accent : palette.primary + "22"),
+            color: spiceFilter === val ? palette.accent : palette.text + "88",
+            fontWeight: spiceFilter === val ? 700 : 500, fontSize: 11.5,
+            cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s ease",
+          }}>{label}</button>
         ))}
       </div>
 
-      {/* Menu by category */}
-      <div style={{ paddingBottom: 100 }}>
-        {loading ? <Spinner primary={palette.primary} /> :
-          CATEGORIES.map(cat => <CategorySection key={cat} category={cat} items={filteredItems} onAdd={addToCart} palette={palette} />)
-        }
+      {/* ITEMS */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 16px 130px" }}>
+        {loading ? <Spinner primary={palette.primary} /> : (() => {
+          const visible = filteredItems.filter(item => activeCategory === "Todos" || item.category === activeCategory);
+          if (visible.length === 0) return <div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ fontSize: 52, marginBottom: 12, opacity: 0.6 }}>🌮</div><p style={{ color: palette.text + "55", fontSize: 14, fontWeight: 600 }}>No hay platos disponibles</p></div>;
+          return visible.map((item, i) => (
+            <div key={item.id} style={{ animation: "fadeUp 0.35s ease both", animationDelay: (i * 0.045) + "s" }}>
+              <ItemCard item={item} onAdd={addToCart} palette={palette} />
+            </div>
+          ));
+        })()}
       </div>
 
-      {/* Footer redes sociales */}
+      {/* SOCIAL FOOTER */}
       {(identity.facebook || identity.instagram || identity.whatsapp_link) && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto", background: palette.bg, borderTop: "1px solid " + palette.primary + "44", padding: "12px 20px", display: "flex", justifyContent: "center", gap: 24, zIndex: 20 }}>
-          {identity.facebook && <a href={identity.facebook} target="_blank" rel="noreferrer" style={{ fontSize: 28, textDecoration: "none" }}>📘</a>}
-          {identity.whatsapp_link && <a href={"https://wa.me/1" + identity.whatsapp_link} target="_blank" rel="noreferrer" style={{ fontSize: 28, textDecoration: "none" }}>💬</a>}
-          {identity.instagram && <a href={identity.instagram} target="_blank" rel="noreferrer" style={{ fontSize: 28, textDecoration: "none" }}>📸</a>}
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto", zIndex: 20, padding: "10px 20px 16px" }}>
+          <div style={{ background: palette.bg + "ee", backdropFilter: "blur(20px)", borderRadius: 22, border: "1px solid " + palette.primary + "30", padding: "11px 24px", display: "flex", justifyContent: "center", gap: 18, boxShadow: "0 -4px 30px rgba(0,0,0,.2)" }}>
+            {identity.facebook && <a href={identity.facebook} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "#1877F2", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px #1877F244" }}>📘</a>}
+            {identity.whatsapp_link && <a href={"https://wa.me/1" + identity.whatsapp_link} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#25D366,#128C7E)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px #25D36644" }}>💬</a>}
+            {identity.instagram && <a href={identity.instagram} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px rgba(220,39,67,.35)" }}>📸</a>}
+          </div>
         </div>
       )}
 
