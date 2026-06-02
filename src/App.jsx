@@ -182,36 +182,60 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const [payMethod, setPayMethod] = React.useState("cash");
   const [name, setName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
   const [deliveryType, setDeliveryType] = React.useState("address");
   const [address, setAddress] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [step, setStep] = React.useState("cart"); // cart | info | review
   const [showReview, setShowReview] = React.useState(false);
+
+  const bankInfo = {
+    name: identity.bank_name || "",
+    holder: identity.bank_holder || "",
+    account: identity.bank_account || "",
+  };
+
+  const saveCustomer = (name, phone) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem("mt_customers") || "[]");
+      existing.push({ name, phone, date: new Date().toLocaleString("es-DO") });
+      localStorage.setItem("mt_customers", JSON.stringify(existing));
+    } catch(e) {}
+  };
 
   const handleSend = () => {
     if (!name.trim()) { alert("Por favor ingresa tu nombre"); return; }
-    onSend({ payMethod, name, address: deliveryType === "address" ? address : "Enviara ubicacion por WhatsApp", notes });
+    saveCustomer(name, phone);
+    onSend({ payMethod, name, phone, address: deliveryType === "address" ? address : "Enviara ubicacion por WhatsApp", notes });
     setShowReview(true);
   };
 
   if (showReview) return <ReviewPopup palette={palette}
-    onSubmit={(stars, comment) => { setShowReview(false); onClose(); }}
+    onSubmit={() => { setShowReview(false); onClose(); }}
     onSkip={() => { setShowReview(false); onClose(); }} />;
 
-  const inputStyle = { width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid " + palette.primary + "33", background: palette.primary + "11", color: palette.text, fontSize: 14, boxSizing: "border-box", fontFamily: "inherit", outline: "none" };
+  const inputStyle = {
+    width: "100%", padding: "12px 14px", borderRadius: 14,
+    border: "1.5px solid " + palette.primary + "33",
+    background: palette.primary + "11", color: palette.text,
+    fontSize: 14, boxSizing: "border-box", fontFamily: "inherit", outline: "none",
+  };
+
+  const btnStyle = (active) => ({
+    flex: 1, padding: "10px 8px", borderRadius: 14,
+    border: "2px solid " + (active ? palette.primary : palette.primary + "30"),
+    background: active ? palette.primary + "18" : "transparent",
+    color: active ? palette.primary : palette.text + "77",
+    fontWeight: 700, fontSize: 11.5, cursor: "pointer", transition: "all .15s",
+  });
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200 }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.55)", backdropFilter: "blur(4px)" }} />
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: palette.bg, borderRadius: "26px 26px 0 0", maxHeight: "92vh", overflowY: "auto", border: "1px solid " + palette.primary + "33", boxShadow: "0 -8px 40px rgba(0,0,0,.3)" }}>
-        
-        {/* Handle bar */}
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
           <div style={{ width: 40, height: 4, borderRadius: 2, background: palette.primary + "44" }} />
         </div>
-
         <div style={{ padding: "16px 20px 40px" }}>
-          {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div style={{ fontWeight: 900, fontSize: 20, color: palette.text }}>Tu pedido 🛒</div>
             <button onClick={onClose} style={{ background: palette.primary + "22", border: "none", width: 34, height: 34, borderRadius: "50%", cursor: "pointer", color: palette.text, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
@@ -223,7 +247,6 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 <p style={{ fontWeight: 600 }}>Tu carrito esta vacio</p>
               </div>
             : <>
-              {/* Cart items */}
               {cart.map(item => (
                 <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid " + palette.primary + "22" }}>
                   <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, border: "1px solid " + palette.primary + "22" }}>
@@ -242,15 +265,13 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 </div>
               ))}
 
-              {/* Total */}
               <div style={{ display: "flex", justifyContent: "space-between", padding: "16px 0", fontWeight: 900, fontSize: 18, color: palette.text, borderBottom: "1px solid " + palette.primary + "22" }}>
                 <span>Total</span>
                 <span style={{ color: palette.accent }}>RD${total}</span>
               </div>
 
-              {/* Customer info */}
-              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: palette.text, marginBottom: 4 }}>📋 Informacion del pedido</div>
+              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: palette.text }}>📋 Informacion del pedido</div>
 
                 {/* Name */}
                 <div>
@@ -258,44 +279,51 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                   <input value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre..." style={inputStyle} />
                 </div>
 
-                {/* Delivery method */}
+                {/* Phone */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 6 }}>Telefono (WhatsApp)</label>
+                  <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="809-000-0000" type="tel" style={inputStyle} />
+                </div>
+
+                {/* Delivery */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de entrega</label>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[["address","📍 Mi direccion"],["whatsapp","📱 Ubicacion por WA"]].map(([val, label]) => (
-                      <button key={val} onClick={() => setDeliveryType(val)} style={{ flex: 1, padding: "10px 8px", borderRadius: 14, border: "2px solid " + (deliveryType === val ? palette.primary : palette.primary + "30"), background: deliveryType === val ? palette.primary + "18" : "transparent", color: deliveryType === val ? palette.primary : palette.text + "77", fontWeight: 700, fontSize: 11.5, cursor: "pointer", transition: "all .15s" }}>{label}</button>
-                    ))}
+                    <button onClick={() => setDeliveryType("address")} style={btnStyle(deliveryType === "address")}>📍 Mi direccion</button>
+                    <button onClick={() => setDeliveryType("whatsapp")} style={btnStyle(deliveryType === "whatsapp")}>📱 Ubicacion por WA</button>
                   </div>
                   {deliveryType === "address" && (
                     <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Escribe tu direccion..." style={{ ...inputStyle, marginTop: 8 }} />
                   )}
                   {deliveryType === "whatsapp" && (
                     <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: "#25D366" + "18", border: "1px solid #25D36633", fontSize: 12, color: palette.text + "99" }}>
-                      💬 Despues de ordenar, envía tu ubicacion por WhatsApp
+                      💬 Despues de ordenar envia tu ubicacion por WhatsApp
                     </div>
                   )}
                 </div>
 
-                {/* Payment method */}
+                {/* Payment */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de pago</label>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[["cash","💵 Efectivo"],["transfer","🏦 Transferencia"]].map(([val, label]) => (
-                      <button key={val} onClick={() => setPayMethod(val)} style={{ flex: 1, padding: "10px 8px", borderRadius: 14, border: "2px solid " + (payMethod === val ? palette.primary : palette.primary + "30"), background: payMethod === val ? palette.primary + "18" : "transparent", color: payMethod === val ? palette.primary : palette.text + "77", fontWeight: 700, fontSize: 11.5, cursor: "pointer", transition: "all .15s" }}>{label}</button>
-                    ))}
+                    <button onClick={() => setPayMethod("cash")} style={btnStyle(payMethod === "cash")}>💵 Efectivo</button>
+                    <button onClick={() => setPayMethod("transfer")} style={btnStyle(payMethod === "transfer")}>🏦 Transferencia</button>
                   </div>
-
-                  {/* Bank info */}
-                  {payMethod === "transfer" && (identity.bank_name || identity.bank_account) && (
+                  {payMethod === "transfer" && (bankInfo.name || bankInfo.account) && (
                     <div style={{ marginTop: 10, padding: "14px 16px", borderRadius: 16, background: palette.primary + "12", border: "1.5px solid " + palette.primary + "30" }}>
                       <div style={{ fontWeight: 800, fontSize: 13, color: palette.text, marginBottom: 10 }}>🏦 Datos bancarios</div>
-                      {[["Banco", identity.bank_name], ["Titular", identity.bank_holder], ["Cuenta", identity.bank_account]].map(([label, val]) => val && (
-                        <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid " + palette.primary + "18" }}>
+                      {[["Banco", bankInfo.name], ["Titular", bankInfo.holder], ["Cuenta", bankInfo.account]].map(([label, val]) => val ? (
+                        <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid " + palette.primary + "18" }}>
                           <span style={{ fontSize: 12, color: palette.text + "77", fontWeight: 600 }}>{label}</span>
-                          <span style={{ fontSize: 12, color: palette.text, fontWeight: 800, letterSpacing: 0.3 }}>{val}</span>
+                          <span style={{ fontSize: 12, color: palette.text, fontWeight: 800 }}>{val}</span>
                         </div>
-                      ))}
-                      <div style={{ fontSize: 11, color: palette.text + "66", marginTop: 8 }}>Envia el comprobante por WhatsApp</div>
+                      ) : null)}
+                      <div style={{ fontSize: 11, color: palette.accent, marginTop: 10, fontWeight: 600 }}>📎 Recuerda enviar el comprobante por WhatsApp</div>
+                    </div>
+                  )}
+                  {payMethod === "transfer" && !bankInfo.name && !bankInfo.account && (
+                    <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: palette.primary + "11", border: "1px solid " + palette.primary + "22", fontSize: 12, color: palette.text + "77" }}>
+                      El restaurante te indicara los datos de transferencia
                     </div>
                   )}
                 </div>
@@ -308,8 +336,7 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 </div>
               </div>
 
-              {/* Send button */}
-              <button onClick={handleSend} style={{ width: "100%", marginTop: 20, padding: 17, background: "linear-gradient(135deg,#25D366,#128C7E)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 28px rgba(37,211,102,.35)", letterSpacing: "-0.2px" }}>
+              <button onClick={handleSend} style={{ width: "100%", marginTop: 20, padding: 17, background: "linear-gradient(135deg,#25D366,#128C7E)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 28px rgba(37,211,102,.35)" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.824L.057 23.057a.75.75 0 0 0 .927.928l5.233-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.52-5.188-1.424l-.372-.221-3.856 1.08 1.08-3.856-.221-.372A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
                 Ordenar por WhatsApp
               </button>
@@ -417,9 +444,24 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
                 ))}
               </div>
             )}
-            <button onClick={exportExcel} style={{ width: "100%", padding: 15, background: "#1a7a3c", border: "none", borderRadius: 14, color: "#fff", fontWeight: 800, fontSize: 15, cursor: "pointer", marginBottom: 20 }}>
-              📥 Exportar a Excel
-            </button>
+            <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+              <button onClick={exportExcel} style={{ flex: 1, padding: 15, background: "#1a7a3c", border: "none", borderRadius: 14, color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+                📥 Exportar ordenes
+              </button>
+              <button onClick={() => {
+                try {
+                  const customers = JSON.parse(localStorage.getItem("mt_customers") || "[]");
+                  if (customers.length === 0) { alert("No hay clientes registrados aun"); return; }
+                  const ws = XLSX.utils.json_to_sheet(customers.map(c => ({ "Nombre": c.name, "Telefono": c.phone || "-", "Fecha": c.date })));
+                  ws["!cols"] = [{ wch: 24 }, { wch: 16 }, { wch: 20 }];
+                  const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb, ws, "Clientes");
+                  XLSX.writeFile(wb, "clientes_maria_taqueria.xlsx");
+                } catch(e) { alert("Error al exportar: " + e.message); }
+              }} style={{ flex: 1, padding: 15, background: "#1a4a7a", border: "none", borderRadius: 14, color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+                👥 Exportar clientes
+              </button>
+            </div>
             {orders.length === 0
               ? <p style={{ textAlign: "center", color: "#555", padding: "32px 0" }}>Sin ordenes aun</p>
               : [...orders].reverse().map(order => (
