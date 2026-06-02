@@ -537,6 +537,16 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
                 </div>
               ))}
             </div>
+            <div style={{ background: "#1a1a1a", borderRadius: 18, padding: 20, border: "1px solid #333", marginBottom: 16 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16, color: palette.accent }}>🏦 Datos bancarios</div>
+              {[["Nombre del banco", "bank_name"], ["Titular de la cuenta", "bank_holder"], ["Numero de cuenta", "bank_account"]].map(([label, key]) => (
+                <div key={key} style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 12, color: "#aaa", display: "block", marginBottom: 6 }}>{label}</label>
+                  <input value={identity[key] || ""} onChange={e => setIdentity(p => ({ ...p, [key]: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #333", fontSize: 14, background: "#2a2a2a", color: "#fff", boxSizing: "border-box", fontFamily: "inherit", outline: "none" }} />
+                </div>
+              ))}
+            </div>
             <button onClick={() => onSaveIdentity(identity)} style={{ width: "100%", padding: 16, background: palette.primary, border: "none", borderRadius: 14, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer" }}>
               Guardar todos los cambios
             </button>
