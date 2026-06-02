@@ -439,6 +439,7 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [spiceFilter, setSpiceFilter] = useState("todos");
+  const [activeCategory, setActiveCategory] = useState("Todos");
 
   const palette = COLOR_PALETTES.find(p => p.primary === identity.primary_color) || DEFAULT_PALETTE;
 
