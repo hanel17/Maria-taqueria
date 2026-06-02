@@ -145,48 +145,182 @@ function ItemCard({ item, onAdd, palette }) {
     </div>
   );
 }
-function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette }) {
-  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+function ReviewPopup({ onSubmit, onSkip, palette }) {
+  const [stars, setStars] = React.useState(0);
+  const [hoverStar, setHoverStar] = React.useState(0);
+  const [comment, setComment] = React.useState("");
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200 }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.7)", backdropFilter: "blur(4px)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: palette.bg, borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", maxHeight: "85vh", overflowY: "auto", border: "1px solid " + palette.primary + "44" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: palette.text }}>Tu pedido 🛒</h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: palette.text }}>✕</button>
+    <div style={{ position: "fixed", inset: 0, zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div onClick={onSkip} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.7)", backdropFilter: "blur(6px)" }} />
+      <div style={{ position: "relative", background: palette.bg, borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, border: "1.5px solid " + palette.primary + "44", boxShadow: "0 24px 64px rgba(0,0,0,.4)" }}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 44, marginBottom: 8 }}>🌮</div>
+          <div style={{ fontWeight: 900, fontSize: 18, color: palette.text, marginBottom: 6 }}>¿Como estuvo tu pedido?</div>
+          <div style={{ fontSize: 13, color: palette.text + "77" }}>Tu opinion nos ayuda a mejorar</div>
         </div>
-        {cart.length === 0
-          ? <p style={{ textAlign: "center", color: palette.text + "66", padding: "32px 0" }}>Tu carrito esta vacio</p>
-          : <>
-            {cart.map(item => (
-              <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid " + palette.primary + "33" }}>
-                <div style={{ width: 50, height: 50, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
-                  <img src={item.image || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: palette.text }}>{item.name}</div>
-                  <div style={{ color: palette.accent, fontWeight: 600, fontSize: 12 }}>RD${item.price} c/u</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <button onClick={() => onRemove(item.id)} style={{ width: 28, height: 28, borderRadius: "50%", background: "#fee2e2", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: 900, fontSize: 16 }}>−</button>
-                  <span style={{ fontWeight: 800, minWidth: 20, textAlign: "center", color: palette.text }}>{item.qty}</span>
-                  <button onClick={() => onAdd(item)} style={{ width: 28, height: 28, borderRadius: "50%", background: palette.primary + "33", border: "none", color: palette.primary, cursor: "pointer", fontWeight: 900, fontSize: 16 }}>+</button>
-                </div>
-                <span style={{ fontWeight: 800, color: palette.accent, minWidth: 60, textAlign: "right", fontSize: 13 }}>RD${item.price * item.qty}</span>
-              </div>
-            ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "16px 0 20px", fontWeight: 900, fontSize: 18, color: palette.text }}>
-              <span>Total</span><span style={{ color: palette.accent }}>RD${total}</span>
-            </div>
-            <button onClick={onSend} style={{ width: "100%", padding: 16, background: "#25D366", border: "none", borderRadius: 14, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-              📱 Ordenar por WhatsApp
-            </button>
-          </>
-        }
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 20 }}>
+          {[1,2,3,4,5].map(s => (
+            <span key={s} onMouseEnter={() => setHoverStar(s)} onMouseLeave={() => setHoverStar(0)} onClick={() => setStars(s)}
+              style={{ fontSize: 36, cursor: "pointer", transition: "transform .15s", transform: (hoverStar || stars) >= s ? "scale(1.2)" : "scale(1)", filter: (hoverStar || stars) >= s ? "none" : "grayscale(1) opacity(.4)" }}>⭐</span>
+          ))}
+        </div>
+        <textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="Comentario opcional..." rows={3}
+          style={{ width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid " + palette.primary + "33", background: palette.primary + "11", color: palette.text, fontSize: 13, resize: "none", boxSizing: "border-box", fontFamily: "inherit", outline: "none", marginBottom: 16 }} />
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onSkip} style={{ flex: 1, padding: 13, borderRadius: 14, border: "1.5px solid " + palette.primary + "44", background: "transparent", color: palette.text + "88", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Omitir</button>
+          <button onClick={() => onSubmit(stars, comment)} disabled={stars === 0}
+            style={{ flex: 2, padding: 13, borderRadius: 14, border: "none", background: stars > 0 ? "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)" : palette.primary + "44", color: "#fff", fontWeight: 800, fontSize: 14, cursor: stars > 0 ? "pointer" : "not-allowed", boxShadow: stars > 0 ? "0 6px 20px " + palette.primary + "44" : "none", transition: "all .2s" }}>
+            Enviar resena ✨
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
+function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity }) {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const [payMethod, setPayMethod] = React.useState("cash");
+  const [name, setName] = React.useState("");
+  const [deliveryType, setDeliveryType] = React.useState("address");
+  const [address, setAddress] = React.useState("");
+  const [notes, setNotes] = React.useState("");
+  const [step, setStep] = React.useState("cart"); // cart | info | review
+  const [showReview, setShowReview] = React.useState(false);
+
+  const handleSend = () => {
+    if (!name.trim()) { alert("Por favor ingresa tu nombre"); return; }
+    onSend({ payMethod, name, address: deliveryType === "address" ? address : "Enviara ubicacion por WhatsApp", notes });
+    setShowReview(true);
+  };
+
+  if (showReview) return <ReviewPopup palette={palette}
+    onSubmit={(stars, comment) => { setShowReview(false); onClose(); }}
+    onSkip={() => { setShowReview(false); onClose(); }} />;
+
+  const inputStyle = { width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid " + palette.primary + "33", background: palette.primary + "11", color: palette.text, fontSize: 14, boxSizing: "border-box", fontFamily: "inherit", outline: "none" };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200 }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.55)", backdropFilter: "blur(4px)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: palette.bg, borderRadius: "26px 26px 0 0", maxHeight: "92vh", overflowY: "auto", border: "1px solid " + palette.primary + "33", boxShadow: "0 -8px 40px rgba(0,0,0,.3)" }}>
+        
+        {/* Handle bar */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: palette.primary + "44" }} />
+        </div>
+
+        <div style={{ padding: "16px 20px 40px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ fontWeight: 900, fontSize: 20, color: palette.text }}>Tu pedido 🛒</div>
+            <button onClick={onClose} style={{ background: palette.primary + "22", border: "none", width: 34, height: 34, borderRadius: "50%", cursor: "pointer", color: palette.text, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+          </div>
+
+          {cart.length === 0
+            ? <div style={{ textAlign: "center", padding: "40px 0", color: palette.text + "55" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🛒</div>
+                <p style={{ fontWeight: 600 }}>Tu carrito esta vacio</p>
+              </div>
+            : <>
+              {/* Cart items */}
+              {cart.map(item => (
+                <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid " + palette.primary + "22" }}>
+                  <div style={{ width: 52, height: 52, borderRadius: 12, overflow: "hidden", flexShrink: 0, border: "1px solid " + palette.primary + "22" }}>
+                    <img src={item.image || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: palette.text }}>{item.name}</div>
+                    <div style={{ color: palette.accent, fontWeight: 600, fontSize: 12, marginTop: 2 }}>RD${item.price} c/u</div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button onClick={() => onRemove(item.id)} style={{ width: 30, height: 30, borderRadius: "50%", background: "#fee2e2", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: 900, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                    <span style={{ fontWeight: 800, minWidth: 22, textAlign: "center", color: palette.text }}>{item.qty}</span>
+                    <button onClick={() => onAdd(item)} style={{ width: 30, height: 30, borderRadius: "50%", background: palette.primary + "25", border: "none", color: palette.primary, cursor: "pointer", fontWeight: 900, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  </div>
+                  <span style={{ fontWeight: 800, color: palette.accent, minWidth: 65, textAlign: "right", fontSize: 13.5 }}>RD${item.price * item.qty}</span>
+                </div>
+              ))}
+
+              {/* Total */}
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "16px 0", fontWeight: 900, fontSize: 18, color: palette.text, borderBottom: "1px solid " + palette.primary + "22" }}>
+                <span>Total</span>
+                <span style={{ color: palette.accent }}>RD${total}</span>
+              </div>
+
+              {/* Customer info */}
+              <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ fontWeight: 800, fontSize: 14, color: palette.text, marginBottom: 4 }}>📋 Informacion del pedido</div>
+
+                {/* Name */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 6 }}>Nombre completo *</label>
+                  <input value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre..." style={inputStyle} />
+                </div>
+
+                {/* Delivery method */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de entrega</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[["address","📍 Mi direccion"],["whatsapp","📱 Ubicacion por WA"]].map(([val, label]) => (
+                      <button key={val} onClick={() => setDeliveryType(val)} style={{ flex: 1, padding: "10px 8px", borderRadius: 14, border: "2px solid " + (deliveryType === val ? palette.primary : palette.primary + "30"), background: deliveryType === val ? palette.primary + "18" : "transparent", color: deliveryType === val ? palette.primary : palette.text + "77", fontWeight: 700, fontSize: 11.5, cursor: "pointer", transition: "all .15s" }}>{label}</button>
+                    ))}
+                  </div>
+                  {deliveryType === "address" && (
+                    <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Escribe tu direccion..." style={{ ...inputStyle, marginTop: 8 }} />
+                  )}
+                  {deliveryType === "whatsapp" && (
+                    <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: "#25D366" + "18", border: "1px solid #25D36633", fontSize: 12, color: palette.text + "99" }}>
+                      💬 Despues de ordenar, envía tu ubicacion por WhatsApp
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment method */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de pago</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[["cash","💵 Efectivo"],["transfer","🏦 Transferencia"]].map(([val, label]) => (
+                      <button key={val} onClick={() => setPayMethod(val)} style={{ flex: 1, padding: "10px 8px", borderRadius: 14, border: "2px solid " + (payMethod === val ? palette.primary : palette.primary + "30"), background: payMethod === val ? palette.primary + "18" : "transparent", color: payMethod === val ? palette.primary : palette.text + "77", fontWeight: 700, fontSize: 11.5, cursor: "pointer", transition: "all .15s" }}>{label}</button>
+                    ))}
+                  </div>
+
+                  {/* Bank info */}
+                  {payMethod === "transfer" && (identity.bank_name || identity.bank_account) && (
+                    <div style={{ marginTop: 10, padding: "14px 16px", borderRadius: 16, background: palette.primary + "12", border: "1.5px solid " + palette.primary + "30" }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, color: palette.text, marginBottom: 10 }}>🏦 Datos bancarios</div>
+                      {[["Banco", identity.bank_name], ["Titular", identity.bank_holder], ["Cuenta", identity.bank_account]].map(([label, val]) => val && (
+                        <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid " + palette.primary + "18" }}>
+                          <span style={{ fontSize: 12, color: palette.text + "77", fontWeight: 600 }}>{label}</span>
+                          <span style={{ fontSize: 12, color: palette.text, fontWeight: 800, letterSpacing: 0.3 }}>{val}</span>
+                        </div>
+                      ))}
+                      <div style={{ fontSize: 11, color: palette.text + "66", marginTop: 8 }}>Envia el comprobante por WhatsApp</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 6 }}>Instrucciones especiales (opcional)</label>
+                  <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Sin cilantro, extra salsa, etc..." rows={2}
+                    style={{ ...inputStyle, resize: "none" }} />
+                </div>
+              </div>
+
+              {/* Send button */}
+              <button onClick={handleSend} style={{ width: "100%", marginTop: 20, padding: 17, background: "linear-gradient(135deg,#25D366,#128C7E)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 28px rgba(37,211,102,.35)", letterSpacing: "-0.2px" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.824L.057 23.057a.75.75 0 0 0 .927.928l5.233-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.52-5.188-1.424l-.372-.221-3.856 1.08 1.08-3.856-.221-.372A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                Ordenar por WhatsApp
+              </button>
+            </>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, onSaveItem, onDeleteItem, onSaveIdentity, palette }) {
   const [tab, setTab] = useState("platos");
