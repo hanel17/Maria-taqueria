@@ -801,12 +801,10 @@ export default function App() {
 
       {/* SOCIAL FOOTER */}
       {(identity.facebook || identity.instagram || identity.whatsapp_link) && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto", zIndex: 20, padding: "10px 20px 16px" }}>
-          <div style={{ background: palette.bg + "ee", backdropFilter: "blur(20px)", borderRadius: 22, border: "1px solid " + palette.primary + "30", padding: "11px 24px", display: "flex", justifyContent: "center", gap: 18, boxShadow: "0 -4px 30px rgba(0,0,0,.2)" }}>
-            {identity.facebook && <a href={identity.facebook} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "#1877F2", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px #1877F244" }}>📘</a>}
-            {identity.whatsapp_link && <a href={"https://wa.me/1" + identity.whatsapp_link} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#25D366,#128C7E)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px #25D36644" }}>💬</a>}
-            {identity.instagram && <a href={identity.instagram} target="_blank" rel="noreferrer" style={{ width: 44, height: 44, borderRadius: 13, background: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 21, boxShadow: "0 4px 14px rgba(220,39,67,.35)" }}>📸</a>}
-          </div>
+        <div style={{ position: "fixed", bottom: 80, right: 16, zIndex: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+            {identity.facebook && <a href={identity.facebook} target="_blank" rel="noreferrer" style={{ width: 48, height: 48, borderRadius: "50%", background: "#1877F2", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 22, boxShadow: "0 4px 12px rgba(0,0,0,.25)", transition: "transform .2s" }} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>📘</a>}
+            {identity.whatsapp_link && <a href={"https://wa.me/1" + identity.whatsapp_link} target="_blank" rel="noreferrer" style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#25D366,#128C7E)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 22, boxShadow: "0 4px 12px rgba(0,0,0,.25)", transition: "transform .2s" }} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>💬</a>}
+            {identity.instagram && <a href={identity.instagram} target="_blank" rel="noreferrer" style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", fontSize: 22, boxShadow: "0 4px 12px rgba(0,0,0,.25)", transition: "transform .2s" }} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>📸</a>}
         </div>
       )}
 
