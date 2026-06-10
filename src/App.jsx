@@ -186,7 +186,6 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
   const [deliveryType, setDeliveryType] = React.useState("address");
   const [address, setAddress] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [showReview, setShowReview] = React.useState(false);
 
   const bankInfo = {
     name: identity.bank_name || "",
@@ -206,12 +205,8 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
     if (!name.trim()) { alert("Por favor ingresa tu nombre"); return; }
     saveCustomer(name, phone);
     onSend({ payMethod, name, phone, address: deliveryType === "address" ? address : "Enviara ubicacion por WhatsApp", notes });
-    setShowReview(true);
+    onClose();
   };
-
-  if (showReview) return <ReviewPopup palette={palette}
-    onSubmit={() => { setShowReview(false); onClose(); }}
-    onSkip={() => { setShowReview(false); onClose(); }} />;
 
   const inputStyle = {
     width: "100%", padding: "12px 14px", borderRadius: 14,
@@ -519,7 +514,7 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
             </div>
             <div style={{ background: "#1a1a1a", borderRadius: 18, padding: 20, border: "1px solid #333" }}>
               <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 16, color: palette.accent }}>📝 Texto</div>
-              {[["Nombre del restaurante", "name"], ["Mensaje de bienvenida", "welcome"]].map(([label, key]) => (
+              {[["Nombre del restaurante", "name"], ["Mensaje de bienvenida", "welcome"], ["WhatsApp para pedidos", "whatsapp_link"]].map(([label, key]) => (
                 <div key={key} style={{ marginBottom: 14 }}>
                   <label style={{ fontSize: 12, color: "#aaa", display: "block", marginBottom: 6 }}>{label}</label>
                   <input value={identity[key] || ""} onChange={e => setIdentity(p => ({ ...p, [key]: e.target.value }))}
@@ -693,7 +688,7 @@ export default function App() {
     const newOrder = { total, items: cart.map(i => ({ ...i })), timestamp: Date.now() };
     const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
     if (saved) setOrders(p => [...p, saved[0]]);
-    const wa = identity.whatsapp_link || "8098011531";
+    const wa = identity.whatsapp_link || "8498066693";
     let msg = "Hola Maria Taqueria! 🌮\n\n";
     msg += "👤 Nombre: " + name + "\n";
     msg += "📍 Entrega: " + address + "\n";
