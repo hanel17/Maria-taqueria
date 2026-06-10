@@ -750,9 +750,12 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const sharedItem = params.get("item");
     if (sharedItem && !loading && items.length > 0) {
+      console.log("Looking for:", sharedItem);
+      console.log("Available slugs:", items.map(i => i.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")));
       const found = items.find(item =>
         item.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") === sharedItem
       );
+      console.log("Found:", found ? found.name : "NOT FOUND");
       if (found) {
         setSelectedItem(found);
         setHighlightedItem(sharedItem);
