@@ -100,12 +100,71 @@ function Spinner({ primary }) {
   );
 }
 
-function ItemCard({ item, onAdd, palette }) {
+function ProductModal({ item, onClose, onAdd, palette }) {
+  const [currentImg, setCurrentImg] = React.useState(0);
+  const images = (item.images && item.images.length > 0) ? item.images.filter(Boolean) : (item.image ? [item.image] : [PLACEHOLDER]);
+  const [added, setAdded] = React.useState(false);
+
+  const handleAdd = () => { onAdd(item); setAdded(true); setTimeout(() => setAdded(false), 1500); };
+
+  const share = () => {
+    const slug = item.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const url = window.location.origin + "/?item=" + slug;
+    if (navigator.share) { navigator.share({ title: item.name, text: item.name + " - RD$" + item.price, url }); }
+    else { navigator.clipboard.writeText(url).then(() => alert("Link copiado!")); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 250 }}>
+      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.75)", backdropFilter: "blur(6px)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: palette.bg, borderRadius: "28px 28px 0 0", maxHeight: "92vh", overflowY: "auto" }}>
+        <div style={{ position: "relative", width: "100%", height: 280, background: "#000", overflow: "hidden" }}>
+          <img src={images[currentImg] || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top," + palette.bg + " 0%,transparent 60%)" }} />
+          <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, width: 38, height: 38, borderRadius: "50%", background: "rgba(0,0,0,.5)", border: "none", color: "#fff", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>✕</button>
+          <button onClick={share} style={{ position: "absolute", top: 16, right: 62, width: 38, height: 38, borderRadius: "50%", background: "rgba(0,0,0,.5)", border: "none", color: "#fff", fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>🔗</button>
+          {images.length > 1 && (
+            <>
+              <button onClick={() => setCurrentImg(i => (i - 1 + images.length) % images.length)} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,.4)", border: "none", color: "#fff", fontSize: 22, cursor: "pointer" }}>‹</button>
+              <button onClick={() => setCurrentImg(i => (i + 1) % images.length)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,.4)", border: "none", color: "#fff", fontSize: 22, cursor: "pointer" }}>›</button>
+              <div style={{ position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+                {images.map((_, i) => <div key={i} onClick={() => setCurrentImg(i)} style={{ width: i === currentImg ? 20 : 6, height: 6, borderRadius: 3, background: i === currentImg ? "#fff" : "rgba(255,255,255,.5)", cursor: "pointer", transition: "all .2s" }} />)}
+              </div>
+            </>
+          )}
+        </div>
+        <div style={{ padding: "20px 20px 40px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+            <h2 style={{ margin: 0, fontWeight: 900, fontSize: 24, color: palette.text, letterSpacing: "-0.5px", flex: 1 }}>{item.name}</h2>
+            {item.spicy && <span style={{ background: "linear-gradient(135deg,#ff4500,#ff8c00)", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 900, color: "#fff", marginLeft: 10 }}>🔥 PICANTE</span>}
+          </div>
+          <p style={{ fontSize: 14, color: palette.text + "88", lineHeight: 1.7, margin: "0 0 20px" }}>{item.description}</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 0", borderTop: "1px solid " + palette.primary + "22", borderBottom: "1px solid " + palette.primary + "22", marginBottom: 20 }}>
+            <div>
+              <div style={{ fontSize: 11, color: palette.text + "55", fontWeight: 600, marginBottom: 2 }}>PRECIO</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: palette.accent, letterSpacing: "-1px" }}>RD${item.price}</div>
+            </div>
+            <span style={{ fontSize: 12, background: palette.primary + "22", color: palette.primary, borderRadius: 20, padding: "5px 14px", fontWeight: 700 }}>{item.category}</span>
+          </div>
+          {item.available
+            ? <button onClick={handleAdd} style={{ width: "100%", padding: 18, background: added ? "#25D366" : "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 17, cursor: "pointer", transition: "background .3s" }}>
+                {added ? "✅ Agregado!" : "🛒 Agregar al carrito — RD$" + item.price}
+              </button>
+            : <div style={{ width: "100%", padding: 18, background: palette.primary + "22", borderRadius: 18, color: palette.text + "55", fontWeight: 700, textAlign: "center" }}>No disponible</div>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ItemCard({ item, onAdd, onOpen, palette }) {
   const [hov, setHov] = React.useState(false);
   const isDark = ["#1a0a2e","#03045E","#1a0a0a","#1C1C1C"].includes(palette.bg);
   const cardBg = isDark ? (palette.bg === "#1a0a2e" ? "#2a1040" : palette.bg === "#03045E" ? "#023E8A" : palette.bg === "#1a0a0a" ? "#2a1010" : "#2a2a2a") : "#fff";
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      onClick={() => onOpen && onOpen(item)}
       style={{ background: cardBg, borderRadius: 22, overflow: "hidden", display: "flex",
         opacity: item.available ? 1 : 0.45,
         border: "1.5px solid " + (hov ? palette.primary : palette.primary + "25"),
@@ -663,6 +722,7 @@ export default function App() {
   const [spiceFilter, setSpiceFilter] = useState("todos");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [highlightedItem, setHighlightedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const palette = COLOR_PALETTES.find(p => p.primary === identity.primary_color) || DEFAULT_PALETTE;
 
@@ -851,7 +911,7 @@ export default function App() {
           if (visible.length === 0) return <div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ fontSize: 52, marginBottom: 12, opacity: 0.6 }}>🌮</div><p style={{ color: palette.text + "55", fontSize: 14, fontWeight: 600 }}>No hay platos disponibles</p></div>;
           return visible.map((item, i) => (
             <div key={item.id} style={{ animation: "fadeUp 0.35s ease both", animationDelay: (i * 0.045) + "s" }}>
-              <ItemCard item={item} onAdd={addToCart} palette={palette} />
+              <ItemCard item={item} onAdd={addToCart} onOpen={setSelectedItem} palette={palette} />
             </div>
           ));
         })()}
