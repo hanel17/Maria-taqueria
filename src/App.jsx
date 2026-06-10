@@ -690,7 +690,7 @@ export default function App() {
       const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
       if (saved) setOrders(p => [...p, saved[0]]);
     } catch(e) { console.error("Order save error:", e); }
-    const wa = identity.whatsapp_link || "18498066693";
+    const wa = (identity.whatsapp_link || "18498066693").replace(/[^0-9]/g, "");
     let msg = "Hola Maria Taqueria! 🌮\n\n";
     msg += "👤 Nombre: " + name + "\n";
     msg += "📍 Entrega: " + address + "\n";
