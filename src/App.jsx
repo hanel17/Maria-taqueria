@@ -926,6 +926,7 @@ export default function App() {
 
       {showCart && <CartDrawer cart={cart} onClose={() => setShowCart(false)} onSend={sendWhatsApp} onRemove={removeFromCart} onAdd={addToCart} palette={palette} identity={identity} />}
       {showPin && <PinGate onUnlock={() => { setShowPin(false); setShowAdmin(true); }} palette={palette} />}
+      {selectedItem && <ProductModal item={selectedItem} onClose={() => setSelectedItem(null)} onAdd={addToCart} palette={palette} />}
     </div>
   );
 }
