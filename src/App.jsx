@@ -686,8 +686,10 @@ export default function App() {
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const payLabel = payMethod === "cash" ? "Efectivo" : "Transferencia bancaria";
     const newOrder = { total, items: cart.map(i => ({ ...i })), timestamp: Date.now() };
-    const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
-    if (saved) setOrders(p => [...p, saved[0]]);
+    try {
+      const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
+      if (saved) setOrders(p => [...p, saved[0]]);
+    } catch(e) { console.error("Order save error:", e); }
     const wa = identity.whatsapp_link || "18498066693";
     let msg = "Hola Maria Taqueria! 🌮\n\n";
     msg += "👤 Nombre: " + name + "\n";
@@ -696,7 +698,9 @@ export default function App() {
     msg += "📋 Pedido:\n" + lines + "\n\n";
     msg += "💰 Total: RD$" + total;
     if (notes) msg += "\n\n📝 Notas: " + notes;
-    window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(msg), "_blank");
+    const waUrl = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg);
+    console.log("Opening WA:", waUrl);
+    window.open(waUrl, "_blank");
     setCart([]);
   };
 
