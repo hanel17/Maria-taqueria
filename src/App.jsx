@@ -745,22 +745,17 @@ export default function App() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Handle shared item URL - wait for items to load
+  // Handle shared item URL - open product modal directly
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sharedItem = params.get("item");
     if (sharedItem && !loading && items.length > 0) {
-      setHighlightedItem(sharedItem);
-      // Find which category the item belongs to and switch to it
-      const found = items.find(item => 
+      const found = items.find(item =>
         item.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") === sharedItem
       );
       if (found) {
-        setActiveCategory("Todos");
-        setTimeout(() => {
-          const el = document.getElementById("item-" + sharedItem);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 400);
+        setSelectedItem(found);
+        setHighlightedItem(sharedItem);
       }
     }
   }, [loading, items]);
