@@ -700,7 +700,13 @@ export default function App() {
     if (notes) msg += "\n\n📝 Notas: " + notes;
     const waUrl = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg);
     console.log("Opening WA:", waUrl);
-    window.open(waUrl, "_blank");
+    const link = document.createElement("a");
+    link.href = waUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     setCart([]);
   };
 
