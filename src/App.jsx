@@ -681,15 +681,10 @@ export default function App() {
   const addToCart = (item) => setCart(p => { const ex = p.find(i => i.id === item.id); return ex ? p.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i) : [...p, { ...item, qty: 1 }]; });
   const removeFromCart = (id) => setCart(p => { const ex = p.find(i => i.id === id); return ex.qty === 1 ? p.filter(i => i.id !== id) : p.map(i => i.id === id ? { ...i, qty: i.qty - 1 } : i); });
 
-  const sendWhatsApp = async ({ payMethod, name, address, notes }) => {
+  const sendWhatsApp = ({ payMethod, name, address, notes }) => {
     const lines = cart.map(i => "- " + i.name + " x" + i.qty + " = RD$" + (i.price * i.qty)).join("\n");
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     const payLabel = payMethod === "cash" ? "Efectivo" : "Transferencia bancaria";
-    const newOrder = { total, items: cart.map(i => ({ ...i })), timestamp: Date.now() };
-    try {
-      const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
-      if (saved) setOrders(p => [...p, saved[0]]);
-    } catch(e) { console.error("Order save error:", e); }
     const wa = (identity.whatsapp_link || "18498066693").replace(/[^0-9]/g, "");
     let msg = "Hola Maria Taqueria! 🌮\n\n";
     msg += "👤 Nombre: " + name + "\n";
@@ -698,15 +693,11 @@ export default function App() {
     msg += "📋 Pedido:\n" + lines + "\n\n";
     msg += "💰 Total: RD$" + total;
     if (notes) msg += "\n\n📝 Notas: " + notes;
-    const waUrl = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg);
-    console.log("Opening WA:", waUrl);
-    const link = document.createElement("a");
-    link.href = waUrl;
-    link.target = "_blank";
-    link.rel = "noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.location.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg);
+    const newOrder = { total, items: cart.map(i => ({ ...i })), timestamp: Date.now() };
+    supabase.from("orders").insert([newOrder]).select().then(({ data: saved }) => {
+      if (saved) setOrders(p => [...p, saved[0]]);
+    }).catch(e => console.error("Order save error:", e));
     setCart([]);
   };
 
