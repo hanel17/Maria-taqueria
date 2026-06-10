@@ -462,6 +462,13 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
               }} style={{ flex: 1, padding: 15, background: "#1a4a7a", border: "none", borderRadius: 14, color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
                 👥 Exportar clientes
               </button>
+              <button onClick={() => {
+                if (window.confirm("Seguro que quieres borrar todo el historial? No se puede deshacer.")) {
+                  supabase.from("orders").delete().neq("id", 0).then(() => setOrders([]));
+                }
+              }} style={{ width: "100%", marginTop: 8, padding: 14, background: "#3a1a1a", border: "1.5px solid #ef444466", borderRadius: 14, color: "#ef4444", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
+                🗑 Reiniciar historial de ordenes
+              </button>
             </div>
             {orders.length === 0
               ? <p style={{ textAlign: "center", color: "#555", padding: "32px 0" }}>Sin ordenes aun</p>
