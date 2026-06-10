@@ -445,7 +445,7 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
                 ))}
               </div>
             )}
-            <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
               <button onClick={exportExcel} style={{ flex: 1, padding: 15, background: "#1a7a3c", border: "none", borderRadius: 14, color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer" }}>
                 📥 Exportar ordenes
               </button>
