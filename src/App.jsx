@@ -671,18 +671,25 @@ export default function App() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Handle shared item URL
+  // Handle shared item URL - wait for items to load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sharedItem = params.get("item");
-    if (sharedItem) {
+    if (sharedItem && !loading && items.length > 0) {
       setHighlightedItem(sharedItem);
-      setTimeout(() => {
-        const el = document.getElementById("item-" + sharedItem);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 1500);
+      // Find which category the item belongs to and switch to it
+      const found = items.find(item => 
+        item.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") === sharedItem
+      );
+      if (found) {
+        setActiveCategory("Todos");
+        setTimeout(() => {
+          const el = document.getElementById("item-" + sharedItem);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 400);
+      }
     }
-  }, []);
+  }, [loading, items]);
 
   useEffect(() => {
     const channel = supabase.channel('identity-changes')
