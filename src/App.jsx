@@ -688,7 +688,7 @@ export default function App() {
     const newOrder = { total, items: cart.map(i => ({ ...i })), timestamp: Date.now() };
     const { data: saved } = await supabase.from("orders").insert([newOrder]).select();
     if (saved) setOrders(p => [...p, saved[0]]);
-    const wa = identity.whatsapp_link || "8498066693";
+    const wa = identity.whatsapp_link || "18498066693";
     let msg = "Hola Maria Taqueria! 🌮\n\n";
     msg += "👤 Nombre: " + name + "\n";
     msg += "📍 Entrega: " + address + "\n";
@@ -696,7 +696,7 @@ export default function App() {
     msg += "📋 Pedido:\n" + lines + "\n\n";
     msg += "💰 Total: RD$" + total;
     if (notes) msg += "\n\n📝 Notas: " + notes;
-    window.open("https://wa.me/1" + wa + "?text=" + encodeURIComponent(msg), "_blank");
+    window.open("https://wa.me/" + wa + "?text=" + encodeURIComponent(msg), "_blank");
     setCart([]);
   };
 
