@@ -584,8 +584,22 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
               <button onClick={() => setEditing(null)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#fff" }}>✕</button>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 10, color: "#aaa" }}>Foto del plato</label>
-              <ImageUploadBox value={form.image} onChange={v => setForm(p => ({ ...p, image: v }))} size={88} radius={14} />
+              <label style={{ fontSize: 13, fontWeight: 700, display: "block", marginBottom: 10, color: "#aaa" }}>Fotos del plato</label>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {[0,1,2].map(idx => (
+                  <div key={idx}>
+                    <ImageUploadBox
+                      value={(form.images && form.images[idx]) || (idx === 0 ? form.image : "")}
+                      onChange={v => setForm(p => {
+                        const imgs = [...(p.images || [p.image || "", "", ""])];
+                        imgs[idx] = v;
+                        return { ...p, images: imgs, image: imgs[0] || p.image };
+                      })}
+                      size={80} radius={12} />
+                    <div style={{ fontSize: 10, color: "#666", textAlign: "center", marginTop: 4 }}>{idx === 0 ? "Principal" : "Extra " + idx}</div>
+                  </div>
+                ))}
+              </div>
             </div>
             {[["Nombre", "name", "text"], ["Descripcion", "description", "text"], ["Precio (RD$)", "price", "number"]].map(([label, key, type]) => (
               <div key={key} style={{ marginBottom: 14 }}>
