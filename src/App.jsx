@@ -204,7 +204,7 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
   const handleSend = () => {
     if (!name.trim()) { alert("Por favor ingresa tu nombre"); return; }
     saveCustomer(name, phone);
-    onSend({ payMethod, name, phone, address: deliveryType === "address" ? address : "Enviara ubicacion por WhatsApp", notes });
+    onSend({ payMethod, name, phone, address: deliveryType === "address" ? address : deliveryType === "here" ? "Comer en el restaurante" : "Enviara ubicacion por WhatsApp", notes });
     onClose();
   };
 
@@ -283,12 +283,18 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 {/* Delivery */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de entrega</label>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => setDeliveryType("address")} style={btnStyle(deliveryType === "address")}>📍 Mi direccion</button>
-                    <button onClick={() => setDeliveryType("whatsapp")} style={btnStyle(deliveryType === "whatsapp")}>📱 Ubicacion por WA</button>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button onClick={() => setDeliveryType("address")} style={btnStyle(deliveryType === "address")}>📍 Delivery</button>
+                    <button onClick={() => setDeliveryType("here")} style={btnStyle(deliveryType === "here")}>🍽 Comer aqui</button>
+                    <button onClick={() => setDeliveryType("whatsapp")} style={btnStyle(deliveryType === "whatsapp")}>📱 Ubicacion WA</button>
                   </div>
                   {deliveryType === "address" && (
                     <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Escribe tu direccion..." style={{ ...inputStyle, marginTop: 8 }} />
+                  )}
+                  {deliveryType === "here" && (
+                    <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: palette.primary + "18", border: "1px solid " + palette.primary + "33", fontSize: 12, color: palette.text + "99" }}>
+                      🍽 Tu pedido sera preparado para comer en el restaurante
+                    </div>
                   )}
                   {deliveryType === "whatsapp" && (
                     <div style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: "#25D366" + "18", border: "1px solid #25D36633", fontSize: 12, color: palette.text + "99" }}>
