@@ -129,17 +129,31 @@ function ItemCard({ item, onAdd, palette }) {
           <p style={{ fontSize: 11.5, color: palette.text + "77", margin: 0, lineHeight: 1.6, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{item.description}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
-          <span style={{ color: palette.accent, fontWeight: 900, fontSize: 19, letterSpacing: "-0.8px" }}>RD${item.price}</span>
-          {item.available && (
-            <button onClick={(e) => { e.stopPropagation(); onAdd(item); }}
-              style={{ width: 38, height: 38, borderRadius: "50%",
-                background: "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)",
-                border: "none", color: "#fff", fontSize: 22, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 6px 20px " + palette.primary + "50",
-                transform: hov ? "scale(1.12) rotate(90deg)" : "scale(1) rotate(0deg)",
-                transition: "transform 0.3s ease" }}>+</button>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: palette.accent, fontWeight: 900, fontSize: 19, letterSpacing: "-0.8px" }}>RD${item.price}</span>
+            <button onClick={(e) => {
+              e.stopPropagation();
+              const slug = item.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+              const url = window.location.origin + "/?item=" + slug;
+              if (navigator.share) {
+                navigator.share({ title: item.name, text: "Mira este plato: " + item.name + " - RD$" + item.price, url });
+              } else {
+                navigator.clipboard.writeText(url).then(() => alert("Link copiado!"));
+              }
+            }} style={{ width: 32, height: 32, borderRadius: "50%", background: palette.primary + "22", border: "1px solid " + palette.primary + "44", color: palette.text, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s" }}>
+              🔗
+            </button>
+            {item.available && (
+              <button onClick={(e) => { e.stopPropagation(); onAdd(item); }}
+                style={{ width: 38, height: 38, borderRadius: "50%",
+                  background: "linear-gradient(135deg," + palette.primary + "," + palette.accent + "cc)",
+                  border: "none", color: "#fff", fontSize: 22, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 6px 20px " + palette.primary + "50",
+                  transform: hov ? "scale(1.12) rotate(90deg)" : "scale(1) rotate(0deg)",
+                  transition: "transform 0.3s ease" }}>+</button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -634,6 +648,7 @@ export default function App() {
   const [showPin, setShowPin] = useState(false);
   const [spiceFilter, setSpiceFilter] = useState("todos");
   const [activeCategory, setActiveCategory] = useState("Todos");
+  const [highlightedItem, setHighlightedItem] = useState(null);
 
   const palette = COLOR_PALETTES.find(p => p.primary === identity.primary_color) || DEFAULT_PALETTE;
 
@@ -655,6 +670,19 @@ export default function App() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Handle shared item URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sharedItem = params.get("item");
+    if (sharedItem) {
+      setHighlightedItem(sharedItem);
+      setTimeout(() => {
+        const el = document.getElementById("item-" + sharedItem);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 1500);
+    }
+  }, []);
 
   useEffect(() => {
     const channel = supabase.channel('identity-changes')
