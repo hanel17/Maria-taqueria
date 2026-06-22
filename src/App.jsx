@@ -416,7 +416,13 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 </div>
               </div>
 
-              <button onClick={handleSend} style={{ width: "100%", marginTop: 20, padding: 17, background: "linear-gradient(135deg,#25D366,#128C7E)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 28px rgba(37,211,102,.35)" }}>
+              <button onClick={onClose} style={{ width: "100%", marginTop: 20, padding: 16, background: "linear-gradient(135deg," + palette.accent + "," + palette.primary + ")", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 15.5, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 24px " + palette.accent + "44", animation: "pulse 2s ease-in-out infinite" }}>
+                <span style={{ fontSize: 18 }}>🌮</span>
+                ¿Quieres agregar algo mas?
+              </button>
+              <style>{"@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}"}</style>
+
+              <button onClick={handleSend} style={{ width: "100%", marginTop: 10, padding: 17, background: "linear-gradient(135deg,#25D366,#128C7E)", border: "none", borderRadius: 18, color: "#fff", fontWeight: 900, fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 28px rgba(37,211,102,.35)" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.824L.057 23.057a.75.75 0 0 0 .927.928l5.233-1.466A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.52-5.188-1.424l-.372-.221-3.856 1.08 1.08-3.856-.221-.372A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
                 Ordenar por WhatsApp
               </button>
