@@ -357,9 +357,9 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de entrega</label>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => setDeliveryType("address")} style={btnStyle(deliveryType === "address")}>📍 Delivery</button>
+                    <button onClick={() => { setDeliveryType("address"); setPayMethod("cash"); }} style={btnStyle(deliveryType === "address")}>📍 Delivery</button>
                     <button onClick={() => setDeliveryType("here")} style={btnStyle(deliveryType === "here")}>🍽 Comer aqui</button>
-                    <button onClick={() => setDeliveryType("whatsapp")} style={btnStyle(deliveryType === "whatsapp")}>📱 Ubicacion WA</button>
+                    <button onClick={() => { setDeliveryType("whatsapp"); setPayMethod("cash"); }} style={btnStyle(deliveryType === "whatsapp")}>📱 Ubicacion WA</button>
                   </div>
                   {deliveryType === "address" && (
                     <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Escribe tu direccion..." style={{ ...inputStyle, marginTop: 8 }} />
@@ -379,10 +379,16 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
                 {/* Payment */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: palette.text + "88", display: "block", marginBottom: 8 }}>Metodo de pago</label>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => setPayMethod("cash")} style={btnStyle(payMethod === "cash")}>💵 Efectivo</button>
-                    <button onClick={() => setPayMethod("transfer")} style={btnStyle(payMethod === "transfer")}>🏦 Transferencia</button>
-                  </div>
+                  {deliveryType === "here" ? (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => setPayMethod("cash")} style={btnStyle(payMethod === "cash")}>💵 Efectivo</button>
+                      <button onClick={() => setPayMethod("transfer")} style={btnStyle(payMethod === "transfer")}>🏦 Transferencia</button>
+                    </div>
+                  ) : (
+                    <div style={{ padding: "10px 14px", borderRadius: 14, background: palette.primary + "12", border: "1px solid " + palette.primary + "25", fontSize: 12.5, color: palette.text + "88", fontWeight: 600 }}>
+                      💵 Solo efectivo para delivery y ubicacion por WhatsApp
+                    </div>
+                  )}
                   {payMethod === "transfer" && (bankInfo.name || bankInfo.account) && (
                     <div style={{ marginTop: 10, padding: "14px 16px", borderRadius: 16, background: palette.primary + "12", border: "1.5px solid " + palette.primary + "30" }}>
                       <div style={{ fontWeight: 800, fontSize: 13, color: palette.text, marginBottom: 10 }}>🏦 Datos bancarios</div>
