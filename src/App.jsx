@@ -745,6 +745,14 @@ export default function App() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Keep Supabase alive - ping every 4 days
+  useEffect(() => {
+    const ping = () => supabase.from("identity").select("id").limit(1).then(() => console.log("Supabase ping OK"));
+    ping();
+    const interval = setInterval(ping, 1000 * 60 * 60 * 24 * 4); // every 4 days
+    return () => clearInterval(interval);
+  }, []);
+
   // Handle shared item URL - open product modal directly
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
