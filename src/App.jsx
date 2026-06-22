@@ -423,7 +423,7 @@ function CartDrawer({ cart, onClose, onSend, onRemove, onAdd, palette, identity 
 }
 
 
-function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, onSaveItem, onDeleteItem, onSaveIdentity, palette }) {
+function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, onSaveItem, onDeleteItem, onSaveIdentity, onMoveItem, palette }) {
   const [tab, setTab] = useState("platos");
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
@@ -473,7 +473,7 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
               <button onClick={openNew} style={{ background: palette.primary, color: "#fff", border: "none", borderRadius: 12, padding: "10px 18px", fontWeight: 800, cursor: "pointer", fontSize: 13 }}>+ Nuevo plato</button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {items.map(item => (
+              {[...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map(item => (
                 <div key={item.id} style={{ background: "#1a1a1a", borderRadius: 14, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, border: "1px solid #333" }}>
                   <div style={{ width: 54, height: 54, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#2a2a2a" }}>
                     <img src={item.image || PLACEHOLDER} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -486,7 +486,11 @@ function AdminPanel({ items, setItems, orders, identity, setIdentity, onClose, o
                     </div>
                     <div style={{ color: palette.accent, fontWeight: 800, fontSize: 13, marginTop: 2 }}>RD${item.price}</div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <button onClick={() => onMoveItem(item.id, "up")} style={{ background: "#333", border: "none", borderRadius: 6, padding: "2px 6px", cursor: "pointer", color: "#fff", fontSize: 10, lineHeight: 1 }}>▲</button>
+                      <button onClick={() => onMoveItem(item.id, "down")} style={{ background: "#333", border: "none", borderRadius: 6, padding: "2px 6px", cursor: "pointer", color: "#fff", fontSize: 10, lineHeight: 1 }}>▼</button>
+                    </div>
                     <Toggle on={item.available} onClick={() => onSaveItem(item.id, { ...item, available: !item.available })} primary={palette.primary} />
                     <button onClick={() => openEdit(item)} style={{ background: "#333", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer", color: "#fff" }}>✏️</button>
                     <button onClick={() => onDeleteItem(item.id)} style={{ background: "#3a1a1a", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>🗑️</button>
@@ -730,7 +734,7 @@ export default function App() {
     setLoading(true);
     try {
       const [{ data: itemsData }, { data: ordersData }, { data: identityData }] = await Promise.all([
-        supabase.from("items").select("*").order("id"),
+        supabase.from("items").select("*").order("sort_order", { ascending: true, nullsFirst: false }),
         supabase.from("orders").select("*").order("id"),
         supabase.from("identity").select("*").limit(1),
       ]);
@@ -794,6 +798,24 @@ export default function App() {
 
   const handleDeleteItem = async (id) => { await supabase.from("items").delete().eq("id", id); setItems(p => p.filter(i => i.id !== id)); };
 
+  const handleMoveItem = async (id, direction) => {
+    const sorted = [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const idx = sorted.findIndex(i => i.id === id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const itemA = sorted[idx];
+    const itemB = sorted[swapIdx];
+    const orderA = itemA.sort_order || idx;
+    const orderB = itemB.sort_order || swapIdx;
+    await supabase.from("items").update({ sort_order: orderB }).eq("id", itemA.id);
+    await supabase.from("items").update({ sort_order: orderA }).eq("id", itemB.id);
+    setItems(p => p.map(i => {
+      if (i.id === itemA.id) return { ...i, sort_order: orderB };
+      if (i.id === itemB.id) return { ...i, sort_order: orderA };
+      return i;
+    }));
+  };
+
   const handleSaveIdentity = async (data) => {
     const { id, updated_at, ...rest } = data;
     if (id) {
@@ -832,7 +854,7 @@ export default function App() {
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const filteredItems = spiceFilter === "todos" ? items : items.filter(i => spiceFilter === "picantes" ? i.spicy : !i.spicy);
 
-  if (showAdmin) return <AdminPanel items={items} setItems={setItems} orders={orders} identity={identity} setIdentity={setIdentity} onClose={() => setShowAdmin(false)} onSaveItem={handleSaveItem} onDeleteItem={handleDeleteItem} onSaveIdentity={handleSaveIdentity} palette={palette} />;
+  if (showAdmin) return <AdminPanel items={items} setItems={setItems} orders={orders} identity={identity} setIdentity={setIdentity} onClose={() => setShowAdmin(false)} onSaveItem={handleSaveItem} onDeleteItem={handleDeleteItem} onSaveIdentity={handleSaveIdentity} onMoveItem={handleMoveItem} palette={palette} />;
 
   return (
     <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "'DM Sans', sans-serif", maxWidth: 480, margin: "0 auto" }}>
@@ -913,7 +935,7 @@ export default function App() {
       {/* ITEMS */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 16px 130px" }}>
         {loading ? <Spinner primary={palette.primary} /> : (() => {
-          const visible = filteredItems.filter(item => activeCategory === "Todos" || item.category === activeCategory);
+          const visible = filteredItems.filter(item => activeCategory === "Todos" || item.category === activeCategory).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
           if (visible.length === 0) return <div style={{ textAlign: "center", padding: "60px 20px" }}><div style={{ fontSize: 52, marginBottom: 12, opacity: 0.6 }}>🌮</div><p style={{ color: palette.text + "55", fontSize: 14, fontWeight: 600 }}>No hay platos disponibles</p></div>;
           return visible.map((item, i) => (
             <div key={item.id} style={{ animation: "fadeUp 0.35s ease both", animationDelay: (i * 0.045) + "s" }}>
